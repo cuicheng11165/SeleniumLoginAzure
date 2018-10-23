@@ -8,7 +8,7 @@ from sys import stdin
 
 class AzureLogin(object):
     def __init__(self,driver_location):
-        self.driver = webdriver.Chrome('D:\\tool\\webtest\\chromedriver_win32\\chromedriver.exe') # 指定ChromeDriver，用Chrome来测试当前网址
+        self.driver = webdriver.Chrome(driver_location) # 指定ChromeDriver，用Chrome来测试当前网址
 
     def login(self,target_url,user_name,password):
         self.user_name=user_name                        
