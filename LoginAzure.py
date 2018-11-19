@@ -45,7 +45,7 @@ class AzureLogin(object):
 
     def save_cookie(self):        
         cookies=self.driver.get_cookies()
-        with open('{0}.txt'.format(self.user_name), 'wb') as cookie_file:
+        with open('Cookies\\{0}.txt'.format(self.user_name), 'wb') as cookie_file:
             pickle.dump(cookies,cookie_file)
         cookie_file.close()
 
