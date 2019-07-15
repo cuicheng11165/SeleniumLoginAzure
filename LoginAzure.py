@@ -4,6 +4,7 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 import pickle
 import time
+import os
 from sys import stdin
 from DataDriver import DataDriver
 import datetime
@@ -13,6 +14,22 @@ class LoginBase(object):
         self.data_driver = DataDriver()
         self.driver = webdriver.Chrome(self.data_driver.driver_location) # 指定ChromeDriver，用Chrome来测试当前网址
 
+    def need_login(self,cookie_location):
+       
+        if not os.path.exists(cookie_location):
+            return True
+
+        cookie_file = open(cookie_location,'rb')
+        cookies_instance=pickle.load(cookie_file,fix_imports=True)      
+
+        login_time=cookies_instance['login_time']
+        
+        time_diff = datetime.datetime.now()-login_time
+
+        self.cookies_entry=cookies_instance['entry']
+
+        return time_diff.seconds > 3600 or self.cookies_entry is None
+     
 
 class AzureLogin(LoginBase):
     def __init__(self):
@@ -65,21 +82,14 @@ class AzureLogin(LoginBase):
 
     
     def read_cookie(self):
-        cookie_file = open("Cookies\\sso\\{0}.txt".format(self.data_driver.login_user_name),'rb')
-        cookies_instance=pickle.load(cookie_file,fix_imports=True)      
+        cookie_location="Cookies\\sso\\{0}.txt".format(self.data_driver.login_user_name)
 
-        login_time=cookies_instance['login_time']
-        
-        time_diff = datetime.datetime.now()-login_time
-
-        cookies_entry=cookies_instance['entry']
-
-        if time_diff.seconds > 3600 or cookies_entry is None:         
-            self.login()
+        if self.need_login(cookie_location):
+            self.login()     
         else:            
             self.driver.get(self.data_driver.gao_portal_url)
 
-            for cookie in cookies_entry:
+            for cookie in self.cookies_entry:
                 self.driver.add_cookie(cookie)
 
             self.driver.get(self.data_driver.gao_portal_url)  
@@ -130,6 +140,7 @@ class AosLogin(LoginBase):
 
         self.driver.switch_to_window(gao_window)
 
+        time.sleep(3)
         self.save_cookie()
         
         # self.driver.close()#把Cookie信息持久化之后关闭浏览器
@@ -144,26 +155,25 @@ class AosLogin(LoginBase):
             pickle.dump(cookie_entity,cookie_file)
         cookie_file.close()
 
+      
+        
 
     def read_cookie(self):
-        cookie_file = open("Cookies\\aos\\{0}.txt".format(self.data_driver.login_user_name),'rb')
-        cookies_instance=pickle.load(cookie_file,fix_imports=True)      
+        self.login()
+        return
+        # cookie_location="Cookies\\aos\\{0}.txt".format(self.data_driver.login_user_name)
+        # if self.need_login(cookie_location):
+        #     self.login()
+        # else:            
+        #     self.driver.get(self.data_driver.gao_portal_url)
 
-        login_time=cookies_instance['login_time']
-        
-        time_diff = datetime.datetime.now()-login_time
+        #     for cookie in self.cookies_entry:
+        #         self.driver.add_cookie(cookie)
 
-        cookies_entry=cookies_instance['entry']
+        #     self.driver.get(self.data_driver.aos_portal_url)  
 
-        if time_diff.seconds > 3600 or cookies_entry is None:         
-            self.login()
-        else:            
-            self.driver.get(self.data_driver.gao_portal_url)
-
-            for cookie in cookies_entry:
-                self.driver.add_cookie(cookie)
-
-            self.driver.get(self.data_driver.gao_portal_url)  
+        #     staysignin_input = self.driver.find_element_by_class_name("GovernanceAutomation")
+        #     staysignin_input.click()#模拟点击Yes 
          
 
 
