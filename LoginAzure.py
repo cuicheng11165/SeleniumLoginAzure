@@ -131,7 +131,7 @@ class AosLogin(LoginBase):
         staysignin_input = self.driver.find_element_by_id("idSIButton9")
         staysignin_input.click()#模拟点击Yes
 
-        time.sleep(1)
+        time.sleep(2)
 
         staysignin_input = self.driver.find_element_by_class_name("GovernanceAutomation")
         staysignin_input.click()#模拟点击Yes
